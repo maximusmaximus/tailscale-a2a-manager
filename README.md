@@ -24,6 +24,10 @@ Powered by **Hermes-Agent Low tier** via [Venice.ai](https://venice.ai) and the 
 4. **Passcode-Protected MCP Interface**:
    - Compliant with Model Context Protocol (MCP) JSON-RPC 2.0.
    - Restricts control operations to authenticated users via passcode.
+5. **Interactive Browser Dashboard**:
+   - Cyber/terminal dark UI running on port `8670`.
+   - Real-time switchboard to flip A2A communication switches ON/OFF with live visual feedback.
+   - Direct message dispatch console and conversational Hermes-Agent Low terminal.
 
 ---
 
@@ -80,6 +84,18 @@ A2A_AUTH_TOKEN=your-a2a-auth-token
 ```bash
 python test_manager.py
 ```
+
+### 3. Launch Web Dashboard
+
+```bash
+# Start on default port 8670 (accessible via localhost and Tailscale IP)
+python web_server.py
+
+# Or on Windows via batch launcher:
+start_web.bat
+```
+
+Open **`http://localhost:8670`** or `http://<tailscale-ip>:8670` in your browser. Enter your passcode to unlock the live switchboard, container inspector, message dispatcher, and Hermes Low terminal.
 
 ---
 

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tailscale A2A Swarm Manager</title>
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --bg-card: #121722;
+      --bg-card-hover: #171e2c;
+      --border-color: #212b3d;
+      --border-glow: #00ffcc33;
+      --text-main: #e2e8f0;
+      --text-muted: #8b9bb4;
+      --accent-cyan: #00ffcc;
+      --accent-blue: #38bdf8;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --font-mono: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      background: #0f1420;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-icon {
+      font-size: 1.8rem;
+    }
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+    }
+    .badge-green { background: #064e3b; color: #34d399; border-color: #059669; }
+    .badge-red { background: #450a0a; color: #f87171; border-color: #dc2626; }
+    .badge-cyan { background: #083344; color: #38bdf8; border-color: #0284c7; }
+
+    /* Button Styles */
+    .btn {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid var(--border-color);
+      padding: 0.45rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+    .btn:hover { background: #334155; border-color: var(--accent-cyan); }
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border-color: #38bdf8;
+    }
+    .btn-primary:hover { background: #0284c7; }
+    .btn-danger { background: #991b1b; border-color: #ef4444; }
+    .btn-danger:hover { background: #b91c1c; }
+
+    /* KPI Summary Strip */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 1.5rem 2rem 0.5rem;
+    }
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .kpi-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+    .kpi-val { font-size: 1.6rem; font-weight: 700; color: #fff; font-family: var(--font-mono); }
+
+    /* Tabs */
+    .tabs-nav {
+      display: flex;
+      gap: 0.5rem;
+      padding: 1rem 2rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .tab-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover { color: #fff; }
+    .tab-btn.active {
+      color: var(--accent-cyan);
+      border-bottom-color: var(--accent-cyan);
+      background: #121722;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 1.5rem 2rem;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Switchboard Grid */
+    .switch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+    .node-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .node-card.enabled {
+      border-color: #059669;
+      box-shadow: 0 0 15px #05966922;
+    }
+    .node-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .node-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .node-ip {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Switch Toggle UI */
+    .switch-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0d121c;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #1a2333;
+    }
+    .switch-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--accent-green); }
+    input:checked + .slider:before { transform: translateX(24px); }
+
+    /* Tag Pills */
+    .pill-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .pill {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: #1a2234;
+      color: #94a3b8;
+      border: 1px solid #27354f;
+    }
+    .pill-agent { background: #3b0764; color: #d8b4fe; border-color: #7e22ce; }
+    .pill-daw { background: #1e1b4b; color: #a5b4fc; border-color: #4338ca; }
+
+    /* Dispatcher & Terminal Form */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 900px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    label { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
+    input, select, textarea {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 0.65rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    textarea { font-family: var(--font-mono); resize: vertical; min-height: 100px; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+    }
+    .terminal-out {
+      background: #05070c;
+      border: 1px solid #1a2233;
+      border-radius: 6px;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #38bdf8;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+
+    /* Auth Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 0 30px #00ffcc22;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .modal-box h2 { font-size: 1.4rem; color: #fff; }
+    .modal-box p { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #090d16;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Passcode Auth Modal -->
+  <div id="authModal" class="modal-overlay">
+    <div class="modal-box">
+      <div>
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔒</div>
+        <h2>A2A Mesh Access Gate</h2>
+        <p>Enter your MCP security passcode to authenticate and control the Tailscale swarm.</p>
+      </div>
+      <form id="authForm" onsubmit="handleLogin(event)">
+        <div class="form-group" style="text-align: left;">
+          <label for="passcodeField">Passcode</label>
+          <input type="password" id="passcodeField" placeholder="Enter security passcode..." required autofocus autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.7rem;">
+          Authenticate
+        </button>
+      </form>
+      <div id="authError" style="color: var(--accent-red); font-size: 0.8rem; display: none;"></div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">TAILSCALE A2A SWARM MANAGER</div>
+        <div class="brand-subtitle">Hermes-Agent Low Tier • Multi-Agent Control Plane</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div id="authBadge" class="badge badge-red">🔒 Locked</div>
+      <div id="meshBadge" class="badge badge-cyan">Mesh Loading...</div>
+      <button class="btn" onclick="rescanFleet()">🔄 Rescan Fleet</button>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- KPI Strip -->
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <span class="kpi-label">Tailscale Nodes</span>
+      <span class="kpi-val" id="kpiTotalNodes">-</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Online Peers</span>
+      <span class="kpi-val" id="kpiOnlineNodes" style="color: var(--accent-green);">-</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Active A2A Switches</span>
+      <span class="kpi-val" id="kpiEnabledSwitches" style="color: var(--accent-cyan);">-</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Discovered Podman Agents</span>
+      <span class="kpi-val" id="kpiAgents">-</span>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('tab-switchboard')">🎛️ Mesh Switchboard</button>
+    <button class="tab-btn" onclick="switchTab('tab-fleet')">📡 Fleet & Containers</button>
+    <button class="tab-btn" onclick="switchTab('tab-dispatch')">⚡ A2A Dispatcher</button>
+    <button class="tab-btn" onclick="switchTab('tab-hermes')">🧠 Hermes-Agent Low</button>
+    <button class="tab-btn" onclick="switchTab('tab-logs')">📜 Activity Log</button>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- TAB 1: Switchboard -->
+    <div id="tab-switchboard" class="tab-content active">
+      <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.1rem; color: #fff;">A2A Inter-Agent Switches</h3>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Toggle to allow or block inter-agent A2A communication</span>
+      </div>
+      <div id="switchboardGrid" class="switch-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TAB 2: Fleet & Containers -->
+    <div id="tab-fleet" class="tab-content">
+      <div class="panel" style="max-width: 100%;">
+        <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <h3>Discovered Tailscale Fleet</h3>
+          <button class="btn btn-primary" onclick="rescanFleet(true)">Full Deep Port Probe</button>
+        </div>
+        <div id="fleetContainer">Loading fleet...</div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Dispatcher -->
+    <div id="tab-dispatch" class="tab-content">
+      <div class="panel">
+        <h3 style="margin-bottom: 1rem;">Direct A2A Message Dispatcher</h3>
+        <div class="form-group">
+          <label>Target Node / Container (Must have Switch ON)</label>
+          <select id="dispatchTarget">
+            <option value="">Select an enabled node...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Sender Name</label>
+          <input type="text" id="dispatchSender" value="web-controller">
+        </div>
+        <div class="form-group">
+          <label>Task Payload / Message</label>
+          <textarea id="dispatchMessage" placeholder="Enter task brief or JSON payload..."></textarea>
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <button class="btn" onclick="setPreset('health')">Health Ping</button>
+          <button class="btn" onclick="setPreset('task')">Task Delegation</button>
+          <button class="btn" onclick="setPreset('card')">Get Agent Card</button>
+        </div>
+        <button class="btn btn-primary" onclick="sendA2AMessage()">Send via A2A</button>
+
+        <div style="margin-top: 1.5rem;">
+          <label>Response Receipt</label>
+          <div id="dispatchOutput" class="terminal-out">Awaiting dispatch...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Hermes Low -->
+    <div id="tab-hermes" class="tab-content">
+      <div class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div>
+            <h3>Hermes-Agent Low (Venice Key Manager)</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Fast, low-cost multi-agent coordination</span>
+          </div>
+          <button class="btn btn-primary" onclick="hermesAnalyzeFleet()">🧠 Auto-Analyze Fleet</button>
+        </div>
+        <div class="form-group">
+          <label>Prompt / Command</label>
+          <textarea id="hermesPrompt" placeholder="Ask Hermes Low to coordinate a task, summarize containers, or inspect routing..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="sendHermesQuery()">Ask Hermes Low</button>
+
+        <div style="margin-top: 1.5rem;">
+          <label>Hermes Low Response</label>
+          <div id="hermesOutput" class="terminal-out">Ready for prompts...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: Activity Log -->
+    <div id="tab-logs" class="tab-content">
+      <div class="panel" style="max-width: 100%;">
+        <h3>Swarm Activity & Audit Timeline</h3>
+        <div id="logsOutput" class="terminal-out" style="max-height: 500px; margin-top: 1rem;">Loading logs...</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div>Tailscale A2A Swarm Manager • Model Context Protocol Enabled</div>
+    <div>Zero hardcoded secrets • Subnet bounded</div>
+  </footer>
+
+  <script>
+    let authToken = localStorage.getItem("a2a_auth_token") || "";
+    let currentFleet = [];
+    let currentMesh = {};
+
+    function getHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + authToken
+      };
+    }
+
+    async function checkAuth() {
+      if (!authToken) {
+        document.getElementById("authModal").style.display = "flex";
+        document.getElementById("authBadge").className = "badge badge-red";
+        document.getElementById("authBadge").textContent = "🔒 Locked";
+        return false;
+      }
+      try {
+        const res = await fetch("/api/mesh", { headers: getHeaders() });
+        if (res.status === 200) {
+          document.getElementById("authModal").style.display = "none";
+          document.getElementById("authBadge").className = "badge badge-green";
+          document.getElementById("authBadge").textContent = "🔓 Authenticated";
+          return true;
+        } else {
+          localStorage.removeItem("a2a_auth_token");
+          authToken = "";
+          document.getElementById("authModal").style.display = "flex";
+          return false;
+        }
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const passcode = document.getElementById("passcodeField").value;
+      const errEl = document.getElementById("authError");
+      errEl.style.display = "none";
+
+      try {
+        const res = await fetch("/api/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ passcode })
+        });
+        const data = await res.json();
+        if (res.ok && data.token) {
+          authToken = data.token;
+          localStorage.setItem("a2a_auth_token", authToken);
+          document.getElementById("authModal").style.display = "none";
+          document.getElementById("authBadge").className = "badge badge-green";
+          document.getElementById("authBadge").textContent = "🔓 Authenticated";
+          loadAllData();
+        } else {
+          errEl.textContent = data.error || "Authentication failed.";
+          errEl.style.display = "block";
+        }
+      } catch (err) {
+        errEl.textContent = "Connection error: " + err.message;
+        errEl.style.display = "block";
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("a2a_auth_token");
+      authToken = "";
+      location.reload();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+      event.target.classList.add("active");
+      document.getElementById(tabId).classList.add("active");
+    }
+
+    async function loadMeshStatus() {
+      try {
+        const res = await fetch("/api/mesh", { headers: getHeaders() });
+        if (!res.ok) return;
+        currentMesh = await res.json();
+        renderSwitchboard();
+        updateKpis();
+      } catch (e) {
+        console.error("Error loading mesh:", e);
+      }
+    }
+
+    async function loadFleet() {
+      try {
+        const res = await fetch("/api/fleet", { headers: getHeaders() });
+        if (!res.ok) return;
+        const data = await res.json();
+        currentFleet = data.nodes || [];
+        renderFleetTable();
+        updateKpis();
+      } catch (e) {
+        console.error("Error loading fleet:", e);
+      }
+    }
+
+    async function loadLogs() {
+      try {
+        const res = await fetch("/api/logs", { headers: getHeaders() });
+        if (!res.ok) return;
+        const data = await res.json();
+        document.getElementById("logsOutput").textContent = JSON.stringify(data.logs, null, 2);
+      } catch (e) {}
+    }
+
+    function updateKpis() {
+      document.getElementById("kpiTotalNodes").textContent = currentFleet.length || "-";
+      document.getElementById("kpiOnlineNodes").textContent = currentFleet.filter(n => n.online).length || "0";
+      document.getElementById("kpiEnabledSwitches").textContent = currentMesh.enabled_count || "0";
+
+      let totalAgents = 0;
+      currentFleet.forEach(n => {
+        totalAgents += (n.containers || []).length;
+      });
+      document.getElementById("kpiAgents").textContent = totalAgents;
+
+      document.getElementById("meshBadge").textContent = `Mesh: ${currentMesh.enabled_count || 0} Enabled`;
+    }
+
+    function renderSwitchboard() {
+      const grid = document.getElementById("switchboardGrid");
+      grid.innerHTML = "";
+      const select = document.getElementById("dispatchTarget");
+      select.innerHTML = '<option value="">Select an enabled node...</option>';
+
+      const allNodes = [...(currentMesh.enabled_nodes || []), ...(currentMesh.disabled_nodes || [])];
+
+      allNodes.forEach(node => {
+        const isEnabled = node.a2a_enabled;
+        const card = document.createElement("div");
+        card.className = "node-card " + (isEnabled ? "enabled" : "");
+
+        if (isEnabled) {
+          const opt = document.createElement("option");
+          opt.value = node.hostname;
+          opt.textContent = `${node.hostname} (${node.ip})`;
+          select.appendChild(opt);
+        }
+
+        let containersHtml = "";
+        (node.containers || []).forEach(c => {
+          let pillClass = "pill";
+          if (c.includes("hermes") || c.includes("sp2")) pillClass += " pill-agent";
+          else if (c.includes("daw")) pillClass += " pill-daw";
+          containersHtml += `<span class="${pillClass}">${c}</span>`;
+        });
+
+        card.innerHTML = `
+          <div class="node-card-header">
+            <div>
+              <div class="node-name">${node.hostname}</div>
+              <div class="node-ip">${node.ip}</div>
+            </div>
+            <div class="badge ${node.online ? 'badge-green' : 'badge-red'}">
+              ${node.online ? 'Online' : 'Offline'}
+            </div>
+          </div>
+
+          <div class="pill-list">
+            ${containersHtml || '<span style="font-size: 0.75rem; color: var(--text-muted);">No Podman containers</span>'}
+          </div>
+
+          <div class="switch-wrapper">
+            <span class="switch-label">${isEnabled ? '🟢 Switch ON' : '⚪ Switch OFF'}</span>
+            <label class="toggle-switch">
+              <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="toggleNode('${node.hostname}', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderFleetTable() {
+      const container = document.getElementById("fleetContainer");
+      if (!currentFleet.length) {
+        container.innerHTML = "<div>No fleet nodes found. Click Rescan Fleet.</div>";
+        return;
+      }
+
+      let html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+      currentFleet.forEach(node => {
+        let containerDetails = "";
+        (node.containers || []).forEach(c => {
+          containerDetails += `
+            <div style="background: #090d16; padding: 0.6rem 0.8rem; border-radius: 4px; margin-top: 0.4rem; font-family: var(--font-mono); font-size: 0.8rem;">
+              <strong>${c.name}</strong> [${c.agent_type}] - Status: ${c.status} - Ports: ${c.ports.join(', ') || 'internal'}
+            </div>
+          `;
+        });
+
+        html += `
+          <div style="background: #0d121c; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong style="color: #fff; font-size: 1rem;">${node.hostname}</strong>
+                <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-cyan); margin-left: 0.75rem;">${node.ip}</span>
+                <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 0.5rem;">(${node.os})</span>
+              </div>
+              <span class="badge ${node.online ? 'badge-green' : 'badge-red'}">${node.online ? 'Online' : 'Offline'}</span>
+            </div>
+            ${containerDetails || '<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">No active containers.</div>'}
+          </div>
+        `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    async function toggleNode(target, enable) {
+      try {
+        const res = await fetch("/api/toggle", {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ target, enable })
+        });
+        const data = await res.json();
+        loadMeshStatus();
+        loadLogs();
+      } catch (e) {
+        alert("Toggle error: " + e.message);
+      }
+    }
+
+    async function rescanFleet(deep = false) {
+      document.getElementById("fleetContainer").textContent = "Rescanning Tailscale mesh and probing ports...";
+      try {
+        const res = await fetch("/api/scan", {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ probe_remote: deep })
+        });
+        const data = await res.json();
+        loadAllData();
+      } catch (e) {
+        alert("Rescan error: " + e.message);
+      }
+    }
+
+    async function sendA2AMessage() {
+      const target = document.getElementById("dispatchTarget").value;
+      const sender = document.getElementById("dispatchSender").value;
+      const message = document.getElementById("dispatchMessage").value;
+      const out = document.getElementById("dispatchOutput");
+
+      if (!target || !message) {
+        alert("Please select an enabled target and provide a message.");
+        return;
+      }
+
+      out.textContent = `Dispatching to ${target} over Tailscale...`;
+      try {
+        const res = await fetch("/api/send", {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ target, sender, message })
+        });
+        const data = await res.json();
+        out.textContent = JSON.stringify(data, null, 2);
+        loadLogs();
+      } catch (e) {
+        out.textContent = "Dispatch error: " + e.message;
+      }
+    }
+
+    function setPreset(type) {
+      if (type === 'health') {
+        document.getElementById("dispatchMessage").value = "Ping: Health and readiness check";
+      } else if (type === 'task') {
+        document.getElementById("dispatchMessage").value = JSON.stringify({ action: "delegate_task", task: "Process DSP pipeline audio stems" }, null, 2);
+      } else if (type === 'card') {
+        document.getElementById("dispatchMessage").value = "Request: Agent Card Capabilities";
+      }
+    }
+
+    async function sendHermesQuery() {
+      const prompt = document.getElementById("hermesPrompt").value;
+      const out = document.getElementById("hermesOutput");
+      if (!prompt) return;
+
+      out.textContent = "Querying Hermes-Agent Low via Venice AI...";
+      try {
+        const res = await fetch("/api/hermes", {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ prompt, include_fleet_context: true })
+        });
+        const data = await res.json();
+        if (data.success) {
+          out.textContent = data.response;
+        } else {
+          out.textContent = "Error: " + (data.error || "Inference failed");
+        }
+      } catch (e) {
+        out.textContent = "Query error: " + e.message;
+      }
+    }
+
+    async function hermesAnalyzeFleet() {
+      document.getElementById("hermesPrompt").value = "Analyze the active Podman containers and A2A switches across the fleet, and provide a 3-bullet coordination summary.";
+      sendHermesQuery();
+    }
+
+    async function loadAllData() {
+      const ok = await checkAuth();
+      if (!ok) return;
+      await loadMeshStatus();
+      await loadFleet();
+      await loadLogs();
+    }
+
+    // Initialize
+    loadAllData();
+  </script>
+</body>
+</html>
