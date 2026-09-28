@@ -1,0 +1,22 @@
+{
+  "venice": {
+    "key_id": "your-venice-key-id",
+    "api_key": "your-venice-api-key",
+    "base_url": "https://api.venice.ai/api/v1",
+    "model": "deepseek-v4-flash",
+    "tier": "low",
+    "temperature": 0.3
+  },
+  "security": {
+    "mcp_passcode": "change-this-passcode",
+    "session_expiry_minutes": 60
+  },
+  "tailscale": {
+    "subnet": "100.64.0.0/10",
+    "probe_ports": [8080, 18789, 18880, 18812, 18813, 8642, 8644]
+  },
+  "a2a": {
+    "default_port": 8080,
+    "local_auth_token": "your-a2a-auth-token"
+  }
+}

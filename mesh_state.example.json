@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-01-01T00:00:00Z",
+  "nodes": {
+    "node-example": {
+      "hostname": "node-example",
+      "display_name": "node-example",
+      "ip": "100.64.0.10",
+      "os": "linux",
+      "online": true,
+      "a2a_enabled": true,
+      "endpoint": "http://100.64.0.10:8080/a2a/v1/message",
+      "port": 8080,
+      "agent_type": "hermes-agent",
+      "containers": ["hermes-worker"],
+      "services": []
+    }
+  },
+  "activity_log": []
+}
