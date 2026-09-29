@@ -72,6 +72,10 @@ class MeshSwitchManager:
             containers = [c.get("name") for c in n.get("containers", [])]
             services = n.get("services", [])
             is_self = n.get("is_self", False)
+            agent_status = n.get("agent_status", {})
+            hermes_running = n.get("hermes_running", False)
+            openclaw_running = n.get("openclaw_running", False)
+            dawagent_running = n.get("dawagent_running", False)
 
             if hostname not in self.state["nodes"]:
                 # Enable self by default, others require explicit toggle
@@ -87,6 +91,10 @@ class MeshSwitchManager:
                     "agent_type": "hermes-podman" if containers else "node",
                     "containers": containers,
                     "services": services,
+                    "agent_status": agent_status,
+                    "hermes_running": hermes_running,
+                    "openclaw_running": openclaw_running,
+                    "dawagent_running": dawagent_running,
                     "last_seen": n.get("last_seen", ""),
                     "last_toggled": datetime.now().isoformat()
                 }
@@ -97,6 +105,10 @@ class MeshSwitchManager:
                 existing["online"] = n.get("online", False)
                 existing["containers"] = containers
                 existing["services"] = services
+                existing["agent_status"] = agent_status
+                existing["hermes_running"] = hermes_running
+                existing["openclaw_running"] = openclaw_running
+                existing["dawagent_running"] = dawagent_running
                 existing["last_seen"] = n.get("last_seen", "")
                 updated.append(hostname)
 
@@ -156,6 +168,11 @@ class MeshSwitchManager:
                 "online": n.get("online", False),
                 "a2a_enabled": n.get("a2a_enabled", False),
                 "containers": n.get("containers", []),
+                "services": n.get("services", []),
+                "agent_status": n.get("agent_status", {}),
+                "hermes_running": n.get("hermes_running", False),
+                "openclaw_running": n.get("openclaw_running", False),
+                "dawagent_running": n.get("dawagent_running", False),
                 "endpoint": n.get("endpoint")
             }
             if n.get("a2a_enabled"):
@@ -163,10 +180,14 @@ class MeshSwitchManager:
             else:
                 disabled.append(summary)
 
+        nodes_val = list(self.state["nodes"].values())
         return {
             "total_nodes": len(self.state["nodes"]),
             "enabled_count": len(enabled),
             "disabled_count": len(disabled),
+            "hermes_running_count": sum(1 for n in nodes_val if n.get("hermes_running")),
+            "openclaw_running_count": sum(1 for n in nodes_val if n.get("openclaw_running")),
+            "dawagent_running_count": sum(1 for n in nodes_val if n.get("dawagent_running")),
             "enabled_nodes": enabled,
             "disabled_nodes": disabled
         }

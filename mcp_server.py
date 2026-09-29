@@ -263,6 +263,9 @@ class A2AMCPServer:
                 "fleet_summary": {
                     "node_count": fleet_data.get("node_count"),
                     "online_count": fleet_data.get("online_count"),
+                    "hermes_running_count": fleet_data.get("hermes_running_count"),
+                    "openclaw_running_count": fleet_data.get("openclaw_running_count"),
+                    "dawagent_running_count": fleet_data.get("dawagent_running_count"),
                     "mesh_synced": sync_res
                 },
                 "nodes": fleet_data.get("nodes")

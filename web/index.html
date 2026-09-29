@@ -83,6 +83,8 @@
     .badge-green { background: #064e3b; color: #34d399; border-color: #059669; }
     .badge-red { background: #450a0a; color: #f87171; border-color: #dc2626; }
     .badge-cyan { background: #083344; color: #38bdf8; border-color: #0284c7; }
+    .badge-purple { background: #3b0764; color: #d8b4fe; border-color: #7e22ce; }
+    .badge-amber { background: #451a03; color: #fbbf24; border-color: #d97706; }
 
     /* Button Styles */
     .btn {
@@ -111,7 +113,7 @@
     /* KPI Summary Strip */
     .kpi-strip {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
       padding: 1.5rem 2rem 0.5rem;
     }
@@ -123,8 +125,10 @@
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
+      transition: border-color 0.2s;
     }
-    .kpi-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+    .kpi-card:hover { border-color: #334155; }
+    .kpi-label { font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.04em; }
     .kpi-val { font-size: 1.6rem; font-weight: 700; color: #fff; font-family: var(--font-mono); }
 
     /* Tabs */
@@ -133,6 +137,7 @@
       gap: 0.5rem;
       padding: 1rem 2rem 0;
       border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
     }
     .tab-btn {
       background: transparent;
@@ -168,7 +173,7 @@
     /* Switchboard Grid */
     .switch-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
       gap: 1.25rem;
     }
     .node-card {
@@ -180,7 +185,7 @@
       flex-direction: column;
       gap: 0.9rem;
       position: relative;
-      transition: border-color 0.2s;
+      transition: all 0.2s ease;
     }
     .node-card.enabled {
       border-color: #059669;
@@ -192,7 +197,7 @@
       align-items: flex-start;
     }
     .node-name {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: #fff;
     }
@@ -200,6 +205,84 @@
       font-family: var(--font-mono);
       font-size: 0.8rem;
       color: var(--text-muted);
+    }
+
+    /* Agent Status Stack */
+    .agent-status-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      background: #090d16;
+      border: 1px solid #1a2333;
+      border-radius: 6px;
+      padding: 0.6rem 0.75rem;
+    }
+    .agent-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+    .agent-status-title {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-green {
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+    .dot-amber {
+      background: #f59e0b;
+      box-shadow: 0 0 8px #f59e0b;
+    }
+    .dot-grey {
+      background: #475569;
+    }
+    .dot-red {
+      background: #ef4444;
+    }
+
+    .tag-running {
+      background: #064e3b33;
+      color: #34d399;
+      border: 1px solid #05966955;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .tag-stopped {
+      background: #78350f33;
+      color: #fbbf24;
+      border: 1px solid #d9770655;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .tag-not-detected {
+      background: #1e293b44;
+      color: #64748b;
+      border: 1px solid #33415533;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+    }
+    .tag-offline {
+      background: #450a0a22;
+      color: #94a3b8;
+      border: 1px solid #450a0a44;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
     }
 
     /* Switch Toggle UI */
@@ -258,6 +341,64 @@
     }
     .pill-agent { background: #3b0764; color: #d8b4fe; border-color: #7e22ce; }
     .pill-daw { background: #1e1b4b; color: #a5b4fc; border-color: #4338ca; }
+    .pill-service { background: #083344; color: #7dd3fc; border-color: #0284c7; }
+
+    /* Filters Bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+    .filter-btn {
+      background: #121722;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .filter-btn:hover { background: #1e293b; color: #fff; }
+    .filter-btn.active {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+    }
+
+    /* Diagnostics Grid */
+    .diag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .diag-box {
+      background: #080c14;
+      border: 1px solid #1a2436;
+      border-radius: 6px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .diag-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+    .diag-detail {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: #64748b;
+      word-break: break-all;
+    }
 
     /* Dispatcher & Terminal Form */
     .panel {
@@ -377,7 +518,8 @@
     <div class="header-actions">
       <div id="authBadge" class="badge badge-red">🔒 Locked</div>
       <div id="meshBadge" class="badge badge-cyan">Mesh Loading...</div>
-      <button class="btn" onclick="rescanFleet()">🔄 Rescan Fleet</button>
+      <button class="btn" onclick="rescanFleet(false)">🔄 Fast Rescan</button>
+      <button class="btn btn-primary" onclick="rescanFleet(true)">🔍 Deep Probe</button>
       <button class="btn btn-danger" onclick="logout()">Logout</button>
     </div>
   </header>
@@ -397,40 +539,68 @@
       <span class="kpi-val" id="kpiEnabledSwitches" style="color: var(--accent-cyan);">-</span>
     </div>
     <div class="kpi-card">
-      <span class="kpi-label">Discovered Podman Agents</span>
-      <span class="kpi-val" id="kpiAgents">-</span>
+      <span class="kpi-label">Hermes Agents Running</span>
+      <span class="kpi-val" id="kpiHermesRunning" style="color: #34d399;">-</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">OpenClaw Agents Running</span>
+      <span class="kpi-val" id="kpiOpenClawRunning" style="color: #38bdf8;">-</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">DAWAgent Active</span>
+      <span class="kpi-val" id="kpiDawRunning" style="color: #a855f7;">-</span>
     </div>
   </div>
 
   <!-- Tabs Navigation -->
   <div class="tabs-nav">
-    <button class="tab-btn active" onclick="switchTab('tab-switchboard')">🎛️ Mesh Switchboard</button>
-    <button class="tab-btn" onclick="switchTab('tab-fleet')">📡 Fleet & Containers</button>
-    <button class="tab-btn" onclick="switchTab('tab-dispatch')">⚡ A2A Dispatcher</button>
-    <button class="tab-btn" onclick="switchTab('tab-hermes')">🧠 Hermes-Agent Low</button>
-    <button class="tab-btn" onclick="switchTab('tab-logs')">📜 Activity Log</button>
+    <button class="tab-btn active" onclick="switchTab('tab-switchboard', event)">🎛️ Mesh Switchboard</button>
+    <button class="tab-btn" onclick="switchTab('tab-fleet', event)">📡 Fleet & Agent Diagnostics</button>
+    <button class="tab-btn" onclick="switchTab('tab-dispatch', event)">⚡ A2A Dispatcher</button>
+    <button class="tab-btn" onclick="switchTab('tab-hermes', event)">🧠 Hermes-Agent Low</button>
+    <button class="tab-btn" onclick="switchTab('tab-logs', event)">📜 Activity Log</button>
   </div>
 
   <!-- Main Content -->
   <main>
     <!-- TAB 1: Switchboard -->
     <div id="tab-switchboard" class="tab-content active">
-      <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 1.1rem; color: #fff;">A2A Inter-Agent Switches</h3>
-        <span style="font-size: 0.8rem; color: var(--text-muted);">Toggle to allow or block inter-agent A2A communication</span>
+      <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h3 style="font-size: 1.1rem; color: #fff;">A2A Inter-Agent Switches</h3>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Toggle switches to allow or block direct A2A task messaging between nodes</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <span class="badge badge-green">🟢 Hermes Active</span>
+          <span class="badge badge-cyan">🔵 OpenClaw Active</span>
+          <span class="badge badge-purple">🟣 DAWAgent Active</span>
+        </div>
       </div>
       <div id="switchboardGrid" class="switch-grid">
         <!-- Rendered by JS -->
       </div>
     </div>
 
-    <!-- TAB 2: Fleet & Containers -->
+    <!-- TAB 2: Fleet & Agent Diagnostics -->
     <div id="tab-fleet" class="tab-content">
       <div class="panel" style="max-width: 100%;">
-        <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-          <h3>Discovered Tailscale Fleet</h3>
+        <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h3 style="color: #fff;">Discovered Fleet & Agent Matrix</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Real-time status of Hermes Agent, OpenClaw Agent, and DAWAgent across all devices</span>
+          </div>
           <button class="btn btn-primary" onclick="rescanFleet(true)">Full Deep Port Probe</button>
         </div>
+
+        <!-- Filter buttons -->
+        <div class="filter-bar">
+          <span style="font-size: 0.8rem; color: var(--text-muted); margin-right: 0.25rem;">Filter:</span>
+          <button class="filter-btn active" onclick="setFleetFilter('all', this)">All Nodes (<span id="filterAllCount">0</span>)</button>
+          <button class="filter-btn" onclick="setFleetFilter('hermes', this)">Hermes Active (<span id="filterHermesCount">0</span>)</button>
+          <button class="filter-btn" onclick="setFleetFilter('openclaw', this)">OpenClaw Active (<span id="filterOpenClawCount">0</span>)</button>
+          <button class="filter-btn" onclick="setFleetFilter('online', this)">Online Only (<span id="filterOnlineCount">0</span>)</button>
+        </div>
+
         <div id="fleetContainer">Loading fleet...</div>
       </div>
     </div>
@@ -453,7 +623,7 @@
           <label>Task Payload / Message</label>
           <textarea id="dispatchMessage" placeholder="Enter task brief or JSON payload..."></textarea>
         </div>
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
           <button class="btn" onclick="setPreset('health')">Health Ping</button>
           <button class="btn" onclick="setPreset('task')">Task Delegation</button>
           <button class="btn" onclick="setPreset('card')">Get Agent Card</button>
@@ -470,7 +640,7 @@
     <!-- TAB 4: Hermes Low -->
     <div id="tab-hermes" class="tab-content">
       <div class="panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
           <div>
             <h3>Hermes-Agent Low (Venice Key Manager)</h3>
             <span style="font-size: 0.8rem; color: var(--text-muted);">Fast, low-cost multi-agent coordination</span>
@@ -502,13 +672,14 @@
   <!-- Footer -->
   <footer>
     <div>Tailscale A2A Swarm Manager • Model Context Protocol Enabled</div>
-    <div>Zero hardcoded secrets • Subnet bounded</div>
+    <div>Zero hardcoded secrets • Subnet bounded • Real-time Agent Detection</div>
   </footer>
 
   <script>
     let authToken = localStorage.getItem("a2a_auth_token") || "";
     let currentFleet = [];
     let currentMesh = {};
+    let activeFleetFilter = "all";
 
     function getHeaders() {
       return {
@@ -578,11 +749,18 @@
       location.reload();
     }
 
-    function switchTab(tabId) {
+    function switchTab(tabId, ev) {
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-      event.target.classList.add("active");
+      if (ev && ev.target) ev.target.classList.add("active");
       document.getElementById(tabId).classList.add("active");
+    }
+
+    function setFleetFilter(filter, btn) {
+      activeFleetFilter = filter;
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+      renderFleetTable();
     }
 
     async function loadMeshStatus() {
@@ -620,17 +798,41 @@
     }
 
     function updateKpis() {
-      document.getElementById("kpiTotalNodes").textContent = currentFleet.length || "-";
-      document.getElementById("kpiOnlineNodes").textContent = currentFleet.filter(n => n.online).length || "0";
-      document.getElementById("kpiEnabledSwitches").textContent = currentMesh.enabled_count || "0";
+      const totalNodes = currentFleet.length || (currentMesh.total_nodes || 0);
+      const onlineNodes = currentFleet.filter(n => n.online).length;
+      const enabledSwitches = currentMesh.enabled_count || 0;
 
-      let totalAgents = 0;
+      let hermesRunning = 0;
+      let openclawRunning = 0;
+      let dawRunning = 0;
+
       currentFleet.forEach(n => {
-        totalAgents += (n.containers || []).length;
+        const astat = n.agent_status || {};
+        if (n.hermes_running || (astat.hermes && astat.hermes.running)) hermesRunning++;
+        if (n.openclaw_running || (astat.openclaw && astat.openclaw.running)) openclawRunning++;
+        if (n.dawagent_running || (astat.dawagent && astat.dawagent.running)) dawRunning++;
       });
-      document.getElementById("kpiAgents").textContent = totalAgents;
 
-      document.getElementById("meshBadge").textContent = `Mesh: ${currentMesh.enabled_count || 0} Enabled`;
+      // Fallback from mesh summary if fleet isn't loaded yet
+      if (currentFleet.length === 0 && currentMesh.hermes_running_count !== undefined) {
+        hermesRunning = currentMesh.hermes_running_count;
+        openclawRunning = currentMesh.openclaw_running_count;
+        dawRunning = currentMesh.dawagent_running_count;
+      }
+
+      document.getElementById("kpiTotalNodes").textContent = totalNodes || "-";
+      document.getElementById("kpiOnlineNodes").textContent = onlineNodes || "0";
+      document.getElementById("kpiEnabledSwitches").textContent = enabledSwitches;
+      document.getElementById("kpiHermesRunning").textContent = hermesRunning;
+      document.getElementById("kpiOpenClawRunning").textContent = openclawRunning;
+      document.getElementById("kpiDawRunning").textContent = dawRunning;
+
+      document.getElementById("filterAllCount").textContent = totalNodes;
+      document.getElementById("filterHermesCount").textContent = hermesRunning;
+      document.getElementById("filterOpenClawCount").textContent = openclawRunning;
+      document.getElementById("filterOnlineCount").textContent = onlineNodes;
+
+      document.getElementById("meshBadge").textContent = `Mesh: ${enabledSwitches} Enabled`;
     }
 
     function renderSwitchboard() {
@@ -653,6 +855,31 @@
           select.appendChild(opt);
         }
 
+        const astat = node.agent_status || {};
+        const hermes = astat.hermes || {
+          running: node.hermes_running || false,
+          status: node.hermes_running ? "RUNNING" : (node.online ? "NOT_DETECTED" : "OFFLINE"),
+          details: ""
+        };
+        const openclaw = astat.openclaw || {
+          running: node.openclaw_running || false,
+          status: node.openclaw_running ? "RUNNING" : (node.online ? "NOT_DETECTED" : "OFFLINE"),
+          details: ""
+        };
+        const dawagent = astat.dawagent || {
+          running: node.dawagent_running || false,
+          status: node.dawagent_running ? "RUNNING" : (node.online ? "NOT_DETECTED" : "OFFLINE"),
+          details: ""
+        };
+
+        const hermesTagClass = hermes.running ? "tag-running" : (hermes.status === "STOPPED" ? "tag-stopped" : (node.online ? "tag-not-detected" : "tag-offline"));
+        const hermesDotClass = hermes.running ? "dot-green" : (hermes.status === "STOPPED" ? "dot-amber" : (node.online ? "dot-grey" : "dot-red"));
+        const hermesText = hermes.running ? (hermes.details && hermes.details.includes("8650") ? "RUNNING (:8650)" : "RUNNING") : (hermes.status === "STOPPED" ? "STOPPED" : (node.online ? "Not running" : "Offline"));
+
+        const ocTagClass = openclaw.running ? "tag-running" : (openclaw.status === "STOPPED" ? "tag-stopped" : (node.online ? "tag-not-detected" : "tag-offline"));
+        const ocDotClass = openclaw.running ? "dot-green" : (openclaw.status === "STOPPED" ? "dot-amber" : (node.online ? "dot-grey" : "dot-red"));
+        const ocText = openclaw.running ? "RUNNING" : (openclaw.status === "STOPPED" ? "STOPPED" : (node.online ? "Not running" : "Offline"));
+
         let containersHtml = "";
         (node.containers || []).forEach(c => {
           let pillClass = "pill";
@@ -672,8 +899,33 @@
             </div>
           </div>
 
+          <div class="agent-status-stack">
+            <div class="agent-status-row">
+              <div class="agent-status-title">
+                <span class="status-dot ${hermesDotClass}"></span>
+                Hermes Agent
+              </div>
+              <span class="${hermesTagClass}">${hermesText}</span>
+            </div>
+            <div class="agent-status-row">
+              <div class="agent-status-title">
+                <span class="status-dot ${ocDotClass}"></span>
+                OpenClaw Agent
+              </div>
+              <span class="${ocTagClass}">${ocText}</span>
+            </div>
+            ${dawagent.running ? `
+            <div class="agent-status-row">
+              <div class="agent-status-title">
+                <span class="status-dot dot-green"></span>
+                DAWAgent
+              </div>
+              <span class="tag-running" style="color: #c084fc; border-color: #7e22ce;">RUNNING</span>
+            </div>` : ''}
+          </div>
+
           <div class="pill-list">
-            ${containersHtml || '<span style="font-size: 0.75rem; color: var(--text-muted);">No Podman containers</span>'}
+            ${containersHtml || '<span style="font-size: 0.72rem; color: var(--text-muted);">No Podman containers</span>'}
           </div>
 
           <div class="switch-wrapper">
@@ -691,32 +943,117 @@
     function renderFleetTable() {
       const container = document.getElementById("fleetContainer");
       if (!currentFleet.length) {
-        container.innerHTML = "<div>No fleet nodes found. Click Rescan Fleet.</div>";
+        container.innerHTML = "<div style='color: var(--text-muted);'>No fleet nodes found. Click Rescan Fleet or Deep Probe.</div>";
+        return;
+      }
+
+      // Apply filter
+      let nodes = currentFleet;
+      if (activeFleetFilter === "hermes") {
+        nodes = nodes.filter(n => n.hermes_running || (n.agent_status && n.agent_status.hermes && n.agent_status.hermes.running));
+      } else if (activeFleetFilter === "openclaw") {
+        nodes = nodes.filter(n => n.openclaw_running || (n.agent_status && n.agent_status.openclaw && n.agent_status.openclaw.running));
+      } else if (activeFleetFilter === "online") {
+        nodes = nodes.filter(n => n.online);
+      }
+
+      if (nodes.length === 0) {
+        container.innerHTML = "<div style='padding: 1.5rem; text-align: center; color: var(--text-muted);'>No nodes match the selected filter.</div>";
         return;
       }
 
       let html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
-      currentFleet.forEach(node => {
-        let containerDetails = "";
+      nodes.forEach(node => {
+        const astat = node.agent_status || {};
+        const hermes = astat.hermes || { running: false, status: node.online ? "NOT_DETECTED" : "OFFLINE", details: "No Hermes service detected" };
+        const openclaw = astat.openclaw || { running: false, status: node.online ? "NOT_DETECTED" : "OFFLINE", details: "No OpenClaw service detected" };
+        const dawagent = astat.dawagent || { running: false, status: node.online ? "NOT_DETECTED" : "OFFLINE", details: "No DAWAgent detected" };
+
+        const hermesTagClass = hermes.running ? "tag-running" : (hermes.status === "STOPPED" ? "tag-stopped" : (node.online ? "tag-not-detected" : "tag-offline"));
+        const hermesDotClass = hermes.running ? "dot-green" : (hermes.status === "STOPPED" ? "dot-amber" : (node.online ? "dot-grey" : "dot-red"));
+
+        const ocTagClass = openclaw.running ? "tag-running" : (openclaw.status === "STOPPED" ? "tag-stopped" : (node.online ? "tag-not-detected" : "tag-offline"));
+        const ocDotClass = openclaw.running ? "dot-green" : (openclaw.status === "STOPPED" ? "dot-amber" : (node.online ? "dot-grey" : "dot-red"));
+
+        const dawTagClass = dawagent.running ? "tag-running" : (dawagent.status === "STOPPED" ? "tag-stopped" : (node.online ? "tag-not-detected" : "tag-offline"));
+        const dawDotClass = dawagent.running ? "dot-green" : (dawagent.status === "STOPPED" ? "dot-amber" : (node.online ? "dot-grey" : "dot-red"));
+
+        // Containers
+        let containerRows = "";
         (node.containers || []).forEach(c => {
-          containerDetails += `
-            <div style="background: #090d16; padding: 0.6rem 0.8rem; border-radius: 4px; margin-top: 0.4rem; font-family: var(--font-mono); font-size: 0.8rem;">
-              <strong>${c.name}</strong> [${c.agent_type}] - Status: ${c.status} - Ports: ${c.ports.join(', ') || 'internal'}
+          containerRows += `
+            <div style="background: #090d16; padding: 0.5rem 0.75rem; border-radius: 4px; margin-top: 0.35rem; font-family: var(--font-mono); font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong style="color: #fff;">${c.name}</strong>
+                <span style="color: #a855f7; margin-left: 0.5rem;">[${c.agent_type}]</span>
+                <span style="color: #64748b; margin-left: 0.5rem;">${c.image}</span>
+              </div>
+              <div>
+                <span style="color: #34d399; margin-right: 0.5rem;">${c.status}</span>
+                <span style="color: #94a3b8;">${(c.ports || []).join(', ') || 'internal'}</span>
+              </div>
             </div>
           `;
         });
 
+        // Services
+        let servicePills = "";
+        (node.services || []).forEach(s => {
+          servicePills += `<span class="pill pill-service">Port ${s.port}: ${s.service}</span>`;
+        });
+
         html += `
-          <div style="background: #0d121c; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="background: #0d121c; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
               <div>
-                <strong style="color: #fff; font-size: 1rem;">${node.hostname}</strong>
+                <strong style="color: #fff; font-size: 1.1rem;">${node.hostname}</strong>
                 <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-cyan); margin-left: 0.75rem;">${node.ip}</span>
                 <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 0.5rem;">(${node.os})</span>
               </div>
-              <span class="badge ${node.online ? 'badge-green' : 'badge-red'}">${node.online ? 'Online' : 'Offline'}</span>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                ${node.is_self ? '<span class="badge badge-purple">Local Host</span>' : ''}
+                <span class="badge ${node.online ? 'badge-green' : 'badge-red'}">${node.online ? 'Online' : 'Offline'}</span>
+              </div>
             </div>
-            ${containerDetails || '<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">No active containers.</div>'}
+
+            <!-- Agent Diagnostics Matrix -->
+            <div class="diag-grid">
+              <div class="diag-box">
+                <div class="diag-header">
+                  <span><span class="status-dot ${hermesDotClass}"></span> HERMES AGENT</span>
+                  <span class="${hermesTagClass}">${hermes.status}</span>
+                </div>
+                <div class="diag-detail">${hermes.details}</div>
+              </div>
+
+              <div class="diag-box">
+                <div class="diag-header">
+                  <span><span class="status-dot ${ocDotClass}"></span> OPENCLAW AGENT</span>
+                  <span class="${ocTagClass}">${openclaw.status}</span>
+                </div>
+                <div class="diag-detail">${openclaw.details}</div>
+              </div>
+
+              <div class="diag-box">
+                <div class="diag-header">
+                  <span><span class="status-dot ${dawDotClass}"></span> DAWAGENT</span>
+                  <span class="${dawTagClass}">${dawagent.status}</span>
+                </div>
+                <div class="diag-detail">${dawagent.details}</div>
+              </div>
+            </div>
+
+            ${servicePills ? `
+            <div style="margin-top: 0.75rem;">
+              <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 0.3rem;">Discovered Services:</span>
+              <div class="pill-list">${servicePills}</div>
+            </div>` : ''}
+
+            ${containerRows ? `
+            <div style="margin-top: 0.75rem;">
+              <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 0.3rem;">Podman Containers:</span>
+              ${containerRows}
+            </div>` : ''}
           </div>
         `;
       });
@@ -740,7 +1077,10 @@
     }
 
     async function rescanFleet(deep = false) {
-      document.getElementById("fleetContainer").textContent = "Rescanning Tailscale mesh and probing ports...";
+      document.getElementById("fleetContainer").innerHTML = `
+        <div style="padding: 1.5rem; text-align: center; color: var(--accent-cyan); font-family: var(--font-mono);">
+          ⚡ Scanning Tailscale nodes and probing agent ports (${deep ? 'Full Deep Probe' : 'Fast Probe'})...
+        </div>`;
       try {
         const res = await fetch("/api/scan", {
           method: "POST",
@@ -748,7 +1088,8 @@
           body: JSON.stringify({ probe_remote: deep })
         });
         const data = await res.json();
-        loadAllData();
+        await loadMeshStatus();
+        await loadFleet();
       } catch (e) {
         alert("Rescan error: " + e.message);
       }
