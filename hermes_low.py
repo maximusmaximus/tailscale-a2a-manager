@@ -38,6 +38,17 @@ class HermesLowAgent:
         self.config = config or load_config()
         venice_cfg = self.config.get("venice", {})
         self.api_key = os.environ.get("VENICE_API_KEY") or venice_cfg.get("api_key", "")
+        # Auto-discover from local venice-key-manager vault if not explicitly set
+        if not self.api_key or self.api_key.startswith("your-"):
+            v_vault_path = Path(__file__).resolve().parent.parent / "venice-key-manager" / "venice_vault.json"
+            if v_vault_path.exists():
+                try:
+                    with open(v_vault_path, "r", encoding="utf-8") as vf:
+                        v_data = json.load(vf)
+                    self.api_key = v_data.get("venice", {}).get("inference_key") or v_data.get("venice", {}).get("admin_key", "")
+                except Exception:
+                    pass
+
         self.key_id = os.environ.get("VENICE_KEY_ID") or venice_cfg.get("key_id", "default-venice-key")
         self.base_url = (os.environ.get("VENICE_BASE_URL") or venice_cfg.get("base_url", "https://api.venice.ai/api/v1")).rstrip("/")
         self.model = os.environ.get("VENICE_MODEL") or venice_cfg.get("model", "deepseek-v4-flash")
