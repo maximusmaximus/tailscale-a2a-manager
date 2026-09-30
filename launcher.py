@@ -65,6 +65,18 @@ def ensure_services():
     else:
         print("[Launcher] A2A Web Dashboard (port 8670) is already running.")
 
+    # 3. Check Venice Key Manager (port 8844)
+    VENICE_DIR = BASE_DIR.parent / "venice-key-manager"
+    if not is_port_listening(8844):
+        supervisor_py = VENICE_DIR / "supervisor.py"
+        if supervisor_py.exists():
+            print("[Launcher] Starting Venice Key Manager Supervisor (port 8844)...")
+            subprocess.Popen([python_exe, str(supervisor_py), "--run"], cwd=str(VENICE_DIR), creationflags=no_window)
+        else:
+            print(f"[Launcher] Warning: {supervisor_py} not found.")
+    else:
+        print("[Launcher] Venice Key Manager (port 8844) is already running.")
+
 
 if __name__ == "__main__":
     ensure_services()
