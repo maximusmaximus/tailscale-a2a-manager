@@ -103,6 +103,28 @@ start_web.bat
 
 Open **`http://localhost:8670`** or `http://<tailscale-ip>:8670` in your browser. Enter your passcode to unlock the live switchboard, container inspector, message dispatcher, and Hermes Low terminal.
 
+### 4. Enable Auto-Start Across Machine Reboots
+
+To ensure that both the A2A Node Service and Web Dashboard automatically start and reconnect over Tailscale whenever the machine restarts or boots:
+
+- **Windows**:
+  ```cmd
+  scripts\install_autostart_windows.bat
+  ```
+  *(Installs a silent, detached background runner into your Windows Startup folder).*
+
+- **Linux (Ubuntu / Debian / systemd)**:
+  ```bash
+  bash scripts/install_autostart_linux.sh
+  ```
+  *(Installs and enables a systemd user service `a2a-node.service` with automatic restart).*
+
+- **macOS**:
+  ```bash
+  bash scripts/install_autostart_macos.sh
+  ```
+  *(Installs and loads a LaunchAgent plist `com.antigravity.a2a.plist` with KeepAlive enabled).*
+
 ---
 
 ## 🤖 Antigravity Node Onboarding Prompt
@@ -147,8 +169,15 @@ Please execute the following steps autonomously:
 5. Firewall Security:
    - Verify and ensure your host firewall (Windows Defender Firewall, ufw, or iptables) permits inbound TCP on port 8080 strictly from the Tailscale subnet (100.64.0.0/10) or Tailscale adapter.
 
-6. Launch Daemon & Confirm:
-   - Start the listener as a persistent background daemon/service.
+6. Auto-Restart Persistence Across Machine Reboots:
+   - Ensure this A2A service automatically restarts whenever this machine is rebooted or powered on:
+     * Linux: Create and enable a systemd user service (`~/.config/systemd/user/a2a-node.service`) with `Restart=always` and `WantedBy=default.target`.
+     * macOS: Create a launchd agent plist (`~/Library/LaunchAgents/com.antigravity.a2a.plist`) with `RunAtLoad=true` and `KeepAlive=true`.
+     * Windows: Add a silent launcher VBS script to `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\`.
+   - Ensure the listener waits for the Tailscale IP to be allocated if network initialization takes a few seconds on boot.
+
+7. Launch Daemon & Confirm:
+   - Start the listener as a persistent background daemon.
    - Test `http://<your-tailscale-ip>:8080/health` locally to confirm 200 OK.
    - Output your completed Client Configuration Block:
      * Hostname & OS
@@ -156,6 +185,7 @@ Please execute the following steps autonomously:
      * A2A Endpoint URL
      * Bearer Auth Token
      * Discovered Agents / Containers
+     * Auto-Restart Status (Enabled)
    - Acknowledge that you are ready to receive tasks dispatched via the Tailscale A2A Swarm Manager switchboard.
 ```
 
@@ -164,6 +194,7 @@ Please execute the following steps autonomously:
 2. **Detection**: The manager scans the Tailscale mesh, detects the new agent's port `8080` A2A service, pulls its `agent-card.json`, and identifies whether Hermes or OpenClaw agents are running.
 3. **Switch ON**: Flip the node's **A2A Communication Switch** to **ON** in the dashboard (or via `a2a_toggle_switch`).
 4. **Dispatch**: Dispatch tasks directly to that agent through the dashboard dispatcher, Hermes-Agent Low reasoning terminal, or MCP tools.
+5. **Persistence**: If any machine restarts, the auto-start unit boots the agent back up, reconnects to Tailscale, and re-announces readiness.
 
 ---
 

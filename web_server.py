@@ -269,7 +269,18 @@ def run_web_server(host: str = "0.0.0.0", port: int = 8670):
     host = os.environ.get("A2A_WEB_HOST") or host
     port = int(os.environ.get("A2A_WEB_PORT") or port)
 
-    server = A2AWebServer((host, port), WebDashboardHandler)
+    retries = 30
+    server = None
+    for attempt in range(1, retries + 1):
+        try:
+            server = A2AWebServer((host, port), WebDashboardHandler)
+            break
+        except Exception as e:
+            if attempt == retries:
+                logger.error(f"Failed to bind web dashboard to {host}:{port}: {e}")
+                sys.exit(1)
+            time.sleep(2)
+
     logger.info(f"==================================================")
     logger.info(f" Tailscale A2A Swarm Web Dashboard")
     logger.info(f" Listening on:       http://{host}:{port}")
@@ -277,11 +288,16 @@ def run_web_server(host: str = "0.0.0.0", port: int = 8670):
     logger.info(f" Auth Protected:     Yes (Passcode Gate)")
     logger.info(f"==================================================")
 
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        logger.info("Stopping Web Dashboard server...")
-        server.server_close()
+    while True:
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            logger.info("Stopping Web Dashboard server...")
+            server.server_close()
+            break
+        except Exception as e:
+            logger.warning(f"Transient error in web server: {e}. Resuming...")
+            time.sleep(1)
 
 
 if __name__ == "__main__":
